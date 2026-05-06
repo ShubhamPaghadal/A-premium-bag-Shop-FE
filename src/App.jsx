@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import Login from './pages/Login'
 import SignUp from './pages/SignUp'
+import Shop from './pages/Shop'
 import './App.css'
 
 function App() {
@@ -10,6 +11,7 @@ function App() {
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />
+        <Route path="/shop" element={<Shop />} />
       </Routes>
     </Router>
   )
