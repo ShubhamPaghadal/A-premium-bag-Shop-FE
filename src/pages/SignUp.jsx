@@ -1,11 +1,46 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { ArrowRight, ShoppingBag } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { ArrowRight, ShoppingBag, Loader2 } from 'lucide-react';
 
 const SignUp = () => {
+  const [fullName, setFullName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
 
-  const {fullName, setfullName} = useState('')
+    setLoading(true);
+    try {
+      const response = await fetch('/users/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fullName, email, password }),
+      });
+
+      if (response.ok) {
+        navigate('/login');
+      } else {
+        const data = await response.json().catch(() => ({}));
+        setError(data.message || 'Registration failed. Please try again.');
+      }
+    } catch (err) {
+      setError('Network error, please try again later');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-[#FAFAFA] font-sans">
       {/* Right side - Form (Swapped for variation) */}
@@ -19,12 +54,15 @@ const SignUp = () => {
           <h1 className="text-3xl font-normal text-neutral-900 mb-2">Create an Account</h1>
           <p className="text-neutral-500 mb-8 font-light">Join us to experience premium bag collections.</p>
 
-          <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>
+          {error && <div className="bg-red-50 text-red-500 p-3 rounded-sm text-sm mb-4 border border-red-100">{error}</div>}
+
+          <form className="space-y-5" onSubmit={handleSubmit}>
             <div className="space-y-2">
               <label className="text-sm font-medium text-neutral-700 block" htmlFor="name">Full Name</label>
               <input
                 id="name"
-                onChange={setfullName}
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
                 type="text"
                 placeholder="Enter your full name"
                 className="w-full px-4 py-3 bg-transparent border border-neutral-300 focus:border-neutral-900 focus:ring-0 outline-none transition-colors duration-300 rounded-sm"
@@ -36,6 +74,8 @@ const SignUp = () => {
               <label className="text-sm font-medium text-neutral-700 block" htmlFor="email">Email address</label>
               <input
                 id="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 type="email"
                 placeholder="Enter your email"
                 className="w-full px-4 py-3 bg-transparent border border-neutral-300 focus:border-neutral-900 focus:ring-0 outline-none transition-colors duration-300 rounded-sm"
@@ -47,6 +87,8 @@ const SignUp = () => {
               <label className="text-sm font-medium text-neutral-700 block" htmlFor="password">Password</label>
               <input
                 id="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 type="password"
                 placeholder="Create a password"
                 className="w-full px-4 py-3 bg-transparent border border-neutral-300 focus:border-neutral-900 focus:ring-0 outline-none transition-colors duration-300 rounded-sm"
@@ -58,6 +100,8 @@ const SignUp = () => {
               <label className="text-sm font-medium text-neutral-700 block" htmlFor="confirm-password">Confirm Password</label>
               <input
                 id="confirm-password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
                 type="password"
                 placeholder="Confirm your password"
                 className="w-full px-4 py-3 bg-transparent border border-neutral-300 focus:border-neutral-900 focus:ring-0 outline-none transition-colors duration-300 rounded-sm"
@@ -67,10 +111,11 @@ const SignUp = () => {
 
             <button
               type="submit"
-              className="w-full bg-neutral-900 text-white py-3.5 px-4 rounded-sm hover:bg-neutral-800 transition-all duration-300 flex items-center justify-center gap-2 group mt-6"
+              disabled={loading}
+              className="w-full bg-neutral-900 text-white py-3.5 px-4 rounded-sm hover:bg-neutral-800 transition-all duration-300 flex items-center justify-center gap-2 group mt-6 disabled:opacity-70 disabled:cursor-not-allowed"
             >
-              Create Account
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Create Account'}
+              {!loading && <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />}
             </button>
           </form>
 
